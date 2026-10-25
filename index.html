@@ -3006,7 +3006,7 @@ const PAGES="https://sugar-unicorn.github.io/pz2-planner/";
 let top0=false;try{top0=window.top===window}catch(e){}
 const base=()=>top0&&/^https?:|^file:/.test(location.href)?location.href.split("#")[0]:PAGES;
 // Where "Report wrong data" sends reports. kind "github": url = repo URL (issues/new is added). kind "form": url with {species} {field} {text} placeholders.
-const FEEDBACK={kind:"",url:""};
+const FEEDBACK={kind:"github",url:"https://github.com/sugar-unicorn/pz2-planner"};
 const b64u=b=>{let s="";for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
 const ub64=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const t=atob(s+"===".slice((s.length+3)%4)),b=new Uint8Array(t.length);for(let i=0;i<t.length;i++)b[i]=t.charCodeAt(i);return b};
 async function pack(o){const s=JSON.stringify(o);try{if(window.CompressionStream){const r=new Blob([s]).stream().pipeThrough(new CompressionStream("deflate-raw"));return "1"+b64u(new Uint8Array(await new Response(r).arrayBuffer()))}}catch(e){}return "0"+b64u(new TextEncoder().encode(s))}
@@ -3101,7 +3101,7 @@ function report(sp){
  <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.7"></div>
  <div class="zrow" style="margin-top:10px">${FEEDBACK.url?`<button type="button" class="zprimary" id="rpsend">Send report</button>`:""}<button type="button" id="rpcopy"${FEEDBACK.url?"":` class="zprimary"`}>Copy report</button></div>
  <p class="note" id="rpmsg" style="margin-top:6px">${FEEDBACK.url?(FEEDBACK.kind==="github"?"Send opens a pre-filled GitHub issue (needs a GitHub account).":"Send opens the feedback form, already filled in."):"Copy the report and post it where you found this planner."} A screenshot of the in-game page helps most.</p>`);
- const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v31\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
+ const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v32\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
  $("rpcopy").onclick=e=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}copy(r.body,e.target)};
  if($("rpsend"))$("rpsend").onclick=()=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}
   const E=encodeURIComponent,u=FEEDBACK.kind==="github"?FEEDBACK.url.replace(/\/$/,"")+"/issues/new?title="+E(`Wrong data: ${r.s||r.f}`)+"&body="+E(r.body):FEEDBACK.url.replace("{species}",E(r.s)).replace("{field}",E(r.f)).replace("{text}",E(r.body));
