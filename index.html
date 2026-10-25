@@ -349,6 +349,7 @@ body.pmode .zeditrow,body.pmode #zquick,body.pmode #zsum{display:none!important}
 .rep{display:inline-block;margin:4px 0 0;padding:2px 9px;font-size:11.5px;font-weight:700;color:var(--mut);background:transparent}
 .rep:hover{color:var(--ink);border-color:var(--acc)}
 .row .rep{display:block}
+.row .mix{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-top:2px}
 .zopenrow{margin-top:8px}
 .pzdlg{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .pzdlg::backdrop{background:rgba(20,30,20,.45)}
@@ -711,10 +712,17 @@ function renderList(){
  $("cnt").textContent="· "+L.length+" of "+DB.length;
  {const k=Object.keys(sel),sh=k.filter(x=>isShoal(by(x))).reduce((a,x)=>a+sel[x],0),n=k.filter(x=>!isShoal(by(x))).reduce((a,x)=>a+sel[x],0);$("zcount").textContent=k.length?k.length+" species · "+[n?n+" animal"+(n>1?"s":""):"",sh?sh+" shoal"+(sh>1?"s":""):""].filter(Boolean).join(" + ")+" in this plan":"No species picked yet"}
  const Lp=L.filter(a=>sel[a.n]),Lr=L.filter(a=>!sel[a.n]);
- const rowZ=a=>`<div class="row${sel[a.n]?" inplan":""}"><div><span class="ico" title="${cls(a)}">${ico(a)}</span><b>${a.n}</b><small>${nwj(`${cls(a)} · ${TN[a.t]} · ${BN[a.b]||a.b}${a.t0!==null?" · "+a.t0+"–"+a.t1+"°C":""}${a.t==="X"?(xd(a).hum?" · humidity "+xd(a).hum[0]+"–"+xd(a).hum[1]+"%":""):isShoal(a)?" · shoals of "+a.g0+"–"+a.g1+" fish · up to "+shMax(a)+" shoals":" · group "+a.g0+"–"+a.g1}${a.t==="Q"&&a.D&&a.D[0]?" · deep water "+a.D[0]+" m² · ~"+DEEPM+" m deep":""}${xd(a).ex?" · also exhibit":""}${xd(a).dlx?" · Deluxe":""}${RL&&RL[a.n]?" · 🚚 releasable":""}`)}</small>${sel[a.n]?`<button type="button" class="rep" data-rep="${a.n}">⚑ Report wrong data</button>`:""}</div>
+ const rowZ=a=>`<div class="row${sel[a.n]?" inplan":""}"><div><span class="ico" title="${cls(a)}">${ico(a)}</span><b>${a.n}</b><small>${nwj(`${cls(a)} · ${TN[a.t]} · ${BN[a.b]||a.b}${a.t0!==null?" · "+a.t0+"–"+a.t1+"°C":""}${a.t==="X"?(xd(a).hum?" · humidity "+xd(a).hum[0]+"–"+xd(a).hum[1]+"%":""):isShoal(a)?" · shoals of "+a.g0+"–"+a.g1+" fish · up to "+shMax(a)+" shoals":" · group "+a.g0+"–"+a.g1+sexCap(a)}${a.t==="Q"&&a.D&&a.D[0]?" · deep water "+a.D[0]+" m² · ~"+DEEPM+" m deep":""}${xd(a).ex?" · also exhibit":""}${xd(a).dlx?" · Deluxe":""}${RL&&RL[a.n]?" · 🚚 releasable":""}`)}</small>${sel[a.n]&&mixOf(a,sel[a.n])?`<span class="mix">Your ${sel[a.n]}: ${mixOf(a,sel[a.n])}</span>`:""}${sel[a.n]?`<button type="button" class="rep" data-rep="${a.n}">⚑ Report wrong data</button>`:""}</div>
  <div class="ctr"><button data-n="${a.n}" data-d="-1">−</button>${isShoal(a)?`<span class="sh">${sel[a.n]||0}<small>shoal${sel[a.n]===1?"":"s"}</small></span>`:`<span>${sel[a.n]||0}</span>`}<button data-n="${a.n}" data-d="1">+</button></div></div>`;
  $("list").innerHTML=L.length?(Lp.length?`<div class="lsec">In your plan · ${Lp.length}</div>`+Lp.map(rowZ).join("")+`<div class="lsec">All species</div>`:"")+Lr.map(rowZ).join(""):`<div class="lempty">No ${filt==="All"?"":filt==="R"?"releasable ":filt==="D"?"ride-friendly ":TN[filt].toLowerCase()+" "}species match “${query.replace(/&/g,"&amp;").replace(/</g,"&lt;")}”.<button type="button" data-clr="1">Clear search${filt==="All"?"":" and filter"}</button></div>`;
 }
+// v31: the game also caps each sex in a mixed group (Preferred Group Ranges, "Max. per sex"); show it and a mix that fits
+const sexCap=a=>{const g=xd(a).gc;return g&&a.t!=="X"&&a.g1>1&&(g[0]<a.g1||g[1]<a.g1)?` (max ${g[0]}♂ ${g[1]}♀)`:""};
+function mixOf(a,n){const g=xd(a).gc;if(!g||isShoal(a)||a.t==="X"||n<2)return "";
+ const m=Math.min(g[0],Math.max(1,n-g[1])),f=n-m;
+ if(m<=g[0]&&f<=g[1]&&f>=0)return `${m}♂ + ${f}♀`+(f===0?" (all-male)":"");
+ if(n<=g[3])return `${n}♀ (all-female group)`;if(n<=g[2])return `${n}♂ (all-male group)`;
+ return `too many for one group (max ${g[0]}♂ + ${g[1]}♀)`}
 const nwj=s=>s.split(" · ").map(x=>`<span class="nw">${x}</span>`).join(" · ");
 $("filters").onclick=e=>{if(e.target.dataset.h){filt=e.target.dataset.h;renderList()}};
 $("q").oninput=e=>{query=e.target.value.toLowerCase();renderList()};
@@ -792,7 +800,7 @@ function startCard(){return `<div class="card start"><h2>👋 Start a plan</h2><
 function sumCard(A,o){const r=[],go=(s,k,v,g)=>r.push(`<button type="button" class="sml s-${s}" data-go="${g}"><i aria-hidden="true">${{ok:"✓",warn:"!",bad:"✕",info:"i"}[s]}</i><span><b>${k}</b><small>${v}</small></span></button>`);
  const sp=A.length,an=A.filter(a=>!isShoal(a)).reduce((x,a)=>x+sel[a.n],0),sh=A.filter(isShoal).reduce((x,a)=>x+sel[a.n],0);
  if(sp>1)go(o.nb?"bad":o.nw?"warn":"ok","Sharing",o.nb?`${o.nb} pair${o.nb>1?"s":""} can’t share · needs ${o.gs} enclosures`:o.nw?`One enclosure works, with ${o.nw} caution${o.nw>1?"s":""}`:`${sp>2?`All ${sp} species`:"Both species"} can share one enclosure${o.nt?` · ${o.nt} Thriving link${o.nt>1?"s":""}`:""}`,"cohabitation");
- const off=A.filter(a=>sel[a.n]<minN(a)||sel[a.n]>maxN(a));go(off.length?"warn":"ok","Group sizes",off.length?off.map(a=>a.n).join(", ")+" outside the allowed group":"Every species is within its group limits","combined-habitat-needs");
+ const off=A.filter(a=>sel[a.n]<minN(a)||sel[a.n]>maxN(a)||/^too many/.test(mixOf(a,sel[a.n])));go(off.length?"warn":"ok","Group sizes",off.length?off.map(a=>a.n).join(", ")+" outside the allowed group":"Every species is within its group limits","combined-habitat-needs");
  if(!o.ex){const T=o.T,ld=T.L[1],wt=T.W[1]+T.D[1];go("info","Space",[ld?`Land ${ld.toLocaleString()} m²`:"",wt?`Water ${wt.toLocaleString()} m²`:"",T.C[1]?`climbing ${T.C[1].toLocaleString()} m²`:"",T.F[1]?`flying ${T.F[1].toLocaleString()} m²`:""].filter(Boolean).join(" · ")+" (comfortable)","combined-habitat-needs")}
  if(o.t0!==null)go(o.t0<=o.t1?"ok":"bad","Temperature",o.t0<=o.t1?`${o.t0}–${o.t1}°C works for everyone`:"No temperature suits every species","combined-habitat-needs");
  if(o.ex&&o.hm0!==null)go(o.hm0<=o.hm1?"ok":"bad","Humidity",o.hm0<=o.hm1?`${o.hm0}–${o.hm1}% works for everyone`:"No humidity suits every species","combined-habitat-needs");
