@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <title>Planet Zoo 2 Enclosure Planner</title>
 <style>
@@ -3101,7 +3102,7 @@ function report(sp){
  <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.7"></div>
  <div class="zrow" style="margin-top:10px">${FEEDBACK.url?`<button type="button" class="zprimary" id="rpsend">Send report</button>`:""}<button type="button" id="rpcopy"${FEEDBACK.url?"":` class="zprimary"`}>Copy report</button></div>
  <p class="note" id="rpmsg" style="margin-top:6px">${FEEDBACK.url?(FEEDBACK.kind==="github"?"Send opens a pre-filled GitHub issue (needs a GitHub account).":"Send opens the feedback form, already filled in."):"Copy the report and post it where you found this planner."} A screenshot of the in-game page helps most.</p>`);
- const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v32\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
+ const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v33\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
  $("rpcopy").onclick=e=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}copy(r.body,e.target)};
  if($("rpsend"))$("rpsend").onclick=()=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}
   const E=encodeURIComponent,u=FEEDBACK.kind==="github"?FEEDBACK.url.replace(/\/$/,"")+"/issues/new?title="+E(`Wrong data: ${r.s||r.f}`)+"&body="+E(r.body):FEEDBACK.url.replace("{species}",E(r.s)).replace("{field}",E(r.f)).replace("{text}",E(r.body));
