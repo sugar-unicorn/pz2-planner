@@ -793,6 +793,7 @@ $("out").onclick=e=>{const d=e.target.dataset;
  if(sw){const sd=sw.dataset;if(sd.tswall!==undefined){const ns=sd.tswall.split("|"),on=sd.on==="1";ns.forEach(n=>{if(on)TTH[n]=1;else delete TTH[n]})}else{if(TTH[sd.tsw])delete TTH[sd.tsw];else TTH[sd.tsw]=1}analyze()}
  else if(d.tth!==undefined){if(e.target.checked)TTH[d.tth]=1;else delete TTH[d.tth];analyze()}
  else if(d.lsty){LSTY[d.sig]=d.lsty;analyze()}
+ else if(d.lrt){LSTY[d.sig+"#rt"]=d.lrt;analyze()}
  else if(d.ride){const g=e.target.closest(".card").querySelector("[data-sig]"),sg=d.sig||(g&&g.dataset.sig);if(sg){if(d.ride==="none")delete RIDE[sg];else RIDE[sg]={t:d.ride}}analyze()}
  else if(d.rrt){if(RIDE[d.sig]){RIDE[d.sig].rt=d.rrt}analyze()}
  else if(d.llab){LLAB=d.llab;try{localStorage.setItem("pz2llab",LLAB)}catch(e){}analyze()}
@@ -883,11 +884,12 @@ function analyze(){
  <div class="note" style="margin-top:6px">Minimum = the largest single requirement; Comfortable = every species’ own requirement added together (extras per animal beyond its minimum group included). Shelter is the indoor area each animal needs, added up for your counts. Birds and egg-laying reptiles need a nest site per breeding pair.</div></div>`;
  h+=thriveCard(A);
  h+=breedCard(A);
+ {const XA=A.filter(a=>a.t==="X");if(XA.length&&flyMix(XA))h+=flyCard(XA)}
  const LA=A.filter(a=>aq?a.t==="Q":a.t!=="Q"&&a.t!=="X"),T2=LA.length?need(LA):null;LASTRIDE=null;
  TPL=LA.length?terrPlan(LA,Math.round(aq?T2.W[1]+T2.D[1]:T2.L[1])):null;h+=terrCard(TPL,aq);
  if(LA.length){
   const n2=LA.filter(a=>a.nest).reduce((x,a)=>x+Math.ceil(sel[a.n]/2),0),L=layout(LA,T2,aq,n2);
-  h+=`<div class="card"><h2>🗺️ Suggested layout</h2><div class="chips" role="group" aria-label="Layout style">${L.styles.map(k=>`<button type="button" class="chip ${k===L.style?"on":""}" data-lsty="${k}" data-sig="${L.sig}" aria-pressed="${k===L.style}">${STY[k].n}</button>`).join("")}</div><div class="chips llabs" role="group" aria-label="Map labels"><span class="zlab">Map labels</span><button type="button" class="chip ${LLAB==="names"?"on":""}" data-llab="names" aria-pressed="${LLAB==="names"}">Names</button><button type="button" class="chip ${LLAB!=="names"?"on":""}" data-llab="numbers" aria-pressed="${LLAB!=="names"}">Numbers only</button></div><div class="insp"><b>${STY[L.style].n}.</b> ${STY[L.style].insp}</div>${L.nowalk&&L.nowalk.length?`<div class="note" style="margin-bottom:6px">No walk-through aviary: the game doesn’t let guests walk through a habitat with ${L.nowalk.join(", ")}.</div>`:""}<div class="note" style="margin-bottom:6px">${aq?`Plan view drawn to scale with a side view through the water underneath (${L.dims}). Follow the numbered markers.`:`Top-down plan drawn to scale (${L.dims}). Follow the numbered markers; dotted white lines are guest sight lines.`}</div><div class="wrap">${L.svg}</div>${TPL?terrKey(TPL):""}<div class="res">${L.res}</div><ol class="zl">${L.zones.map(z=>`<li><span class="zn">${z[0]}</span><div><b>${z[1]}</b><div class="note">${z[2]}</div></div></li>`).join("")}</ol>${L.depth?`<h3 class="h3">Depth</h3><div class="wrap">${L.depth}</div>`:""}${L.notes?`<div class="lchk"><div><b>For guests</b><ul>${L.notes.guest.map(x=>`<li>${x}</li>`).join("")}</ul></div><div><b>For the animals</b><ul>${L.notes.animal.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>`:""}</div>`;
+  h+=`<div class="card"><h2>🗺️ Suggested layout</h2><div class="chips" role="group" aria-label="Layout style">${L.styles.map(k=>`<button type="button" class="chip ${k===L.style?"on":""}" data-lsty="${k}" data-sig="${L.sig}" aria-pressed="${k===L.style}">${STY[k].n}</button>`).join("")}</div><div class="chips llabs" role="group" aria-label="Map labels"><span class="zlab">Map labels</span><button type="button" class="chip ${LLAB==="names"?"on":""}" data-llab="names" aria-pressed="${LLAB==="names"}">Names</button><button type="button" class="chip ${LLAB!=="names"?"on":""}" data-llab="numbers" aria-pressed="${LLAB!=="names"}">Numbers only</button></div>${L.rt?rtChips(L.sig,L.rt,0):""}<div class="insp"><b>${STY[L.style].n}.</b> ${STY[L.style].insp}</div>${L.rt?rtNote(L.rt,0):""}${L.nowalk&&L.nowalk.length?`<div class="note" style="margin-bottom:6px">No walk-through aviary: the game doesn’t let guests walk through a habitat with ${L.nowalk.join(", ")}.</div>`:""}<div class="note" style="margin-bottom:6px">${aq?`Plan view drawn to scale with a side view through the water underneath (${L.dims}). Follow the numbered markers.`:`Top-down plan drawn to scale (${L.dims}). Follow the numbered markers; dotted white lines are guest sight lines.`}</div><div class="wrap">${L.svg}</div>${TPL?terrKey(TPL):""}<div class="res">${L.res}</div><ol class="zl">${L.zones.map(z=>`<li><span class="zn">${z[0]}</span><div><b>${z[1]}</b><div class="note">${z[2]}</div></div></li>`).join("")}</ol>${L.depth?`<h3 class="h3">Depth</h3><div class="wrap">${L.depth}</div>`:""}${L.notes?`<div class="lchk"><div><b>For guests</b><ul>${L.notes.guest.map(x=>`<li>${x}</li>`).join("")}</ul></div><div><b>For the animals</b><ul>${L.notes.animal.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>`:""}</div>`;
   h+=rideCard(LA,L);
   h+=barrierCard(LA,L);
   if(L.pg)h+=`<div class="card"><h2>${aq?"🪸 Aquascaping guide":"🌿 Native planting guide"}</h2><div class="pgl">${L.pg}</div><div class="note" style="margin-top:8px">Plants are each species’ real-world native vegetation (my selection). The game has its own plant list, and the animal’s Habitat tab in-game shows which plants it likes or dislikes, so use these as a style guide and confirm there.</div></div>`;
@@ -1267,6 +1269,11 @@ multi:{n:"Three-level visit",insp:"Large modern aquariums show one tank three wa
 tunnel:{n:"Walk-through tunnel",arc:[.15,.85],front:[],views:[],insp:"Acrylic tunnels, first built in the 1980s, take guests through the tank so sharks, rays and shoals pass overhead. A reef wall along the back and sand flats give bottom-dwellers their own space."}};
 const FRN={haha:"hidden dry moat (ha-ha)",glass:"glass panels",under:"underwater glass",rock:"rockwork with windows"};
 const LSTY={};
+// v35: guest routes for walk-throughs. One gate (in and out), loop (entry and exit gates on one main path) or through (gates on opposite sides, joined to two main paths).
+const RTS=[["single","One gate","One door"],["loop","Loop · 2 gates","Loop · 2 doors"],["through","Through · 2 gates","Through · 2 doors"]],WTS=["walk","walkin","board"];
+const rtOf=sig=>{const v=LSTY[sig+"#rt"];return RTS.some(r=>r[0]===v)?v:"loop"};
+function rtChips(sig,cur,ex){return `<div class="chips llabs" role="group" aria-label="Guest route"><span class="zlab">Guest route</span>${RTS.map(r=>`<button type="button" class="chip ${r[0]===cur?"on":""}" data-lrt="${r[0]}" data-sig="${sig}" aria-pressed="${r[0]===cur}">${r[ex?2:1]}</button>`).join("")}</div>`}
+function rtNote(rt,ex){const g=ex?"door":"gate";return `<div class="note" style="margin-bottom:6px">${{single:`<b>One ${g}:</b> the simplest build, but guests going in meet guests coming out on the same stretch, so it backs up at busy times. Best for a quiet corner.`,loop:`<b>Loop:</b> a separate entry ${g} and exit ${g}, both joined to the same main path. Guests go round once instead of doubling back.`,through:`<b>Through:</b> entry and exit ${g}s on opposite sides, each joined to a different main path. Guests pass through in one direction, and it doubles as a short cut between the two paths.`}[rt]} Guests still pick their own direction, so two ${g}s spread the crowd rather than enforce one way. <span class="psrc">Rule of thumb</span></div>`}
 function polyArea(P){let s=0;for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];s+=a[0]*b[1]-b[0]*a[1]}return Math.abs(s)/2}
 function inPoly(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
 function segD(a,b,x,y){const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/(dx*dx+dy*dy||1)));return Math.hypot(x-a[0]-t*dx,y-a[1]-t*dy)}
@@ -1624,6 +1631,43 @@ function sCurve(P,step){const o=[],m=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let cu
  const qb=(a,c,b)=>{const L=Math.hypot(c[0]-a[0],c[1]-a[1])+Math.hypot(b[0]-c[0],b[1]-c[1]),n=Math.max(2,Math.ceil(L/step));for(let j=1;j<=n;j++){const t=j/n,u=1-t;o.push([u*u*a[0]+2*u*t*c[0]+t*t*b[0],u*u*a[1]+2*u*t*c[1]+t*t*b[1]])}};
  for(let i=1;i<P.length-1;i++){const q=m(P[i],P[i+1]);qb(cur,P[i],q);cur=q}
  const l=P[P.length-1];qb(cur,m(cur,l),l);return o}
+// v35: walkthrough exhibit (butterflies). A schematic, not to scale: the game's exhibit has one size and shape, with Door 1 and Door 2 that can each be turned on or off.
+function flyCard(XA){const rt=rtOf("bfly"),Z=[];let g="";
+ const mk=(x,y)=>{const n=Z.length+1;g+=`<circle cx="${x}" cy="${y}" r="12" fill="#14402e" stroke="#c8e65a" stroke-width="3"/><text x="${x}" y="${y+4.5}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Fredoka,system-ui,sans-serif">${n}</text>`;return n};
+ const road=(pts,w)=>`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#9c927c" stroke-width="${w+4}" stroke-linejoin="round" stroke-linecap="round"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#e6dcc2" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
+ const arr=(x,y,an)=>`<path d="M-5 -6 L4 0 L-5 6" fill="none" stroke="#5a4630" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(${x} ${y}) rotate(${an})"/>`;
+ const door=(x,y,v)=>`<rect x="${v?x-6:x-14}" y="${v?y-14:y-6}" width="${v?12:28}" height="${v?28:12}" rx="2" fill="#cfe7d8" stroke="#2d3b35" stroke-width="2"/>`;
+ g+=`<rect width="640" height="400" fill="#dcebc4"/>`;
+ // main paths outside
+ if(rt==="through")g+=road([[60,10],[60,390]],26)+road([[580,10],[580,390]],26);
+ else g+=road([[10,362],[630,362]],26);
+ // links from the doors to the main path(s)
+ if(rt==="single")g+=road([[320,290],[320,362]],14);
+ else if(rt==="loop")g+=road([[170,190],[110,190],[110,362]],14)+road([[470,190],[530,190],[530,362]],14);
+ else g+=road([[60,190],[170,190]],14)+road([[470,190],[580,190]],14);
+ // the exhibit
+ g+=`<rect x="170" y="90" width="300" height="200" rx="6" fill="#eef6e4" stroke="#2d3b35" stroke-width="5"/><rect x="170" y="90" width="300" height="200" rx="6" fill="none" stroke="#7fb6d0" stroke-width="1.5" stroke-dasharray="3 6" transform="translate(0 0)"/>`;
+ // inside path
+ const ins=rt==="single"?[[320,290],[320,252],[250,226],[250,140],[390,140],[390,226],[320,252]]:[[170,190],[214,236],[272,144],[330,236],[388,144],[436,230],[470,190]];
+ g+=road(ins,12);
+ // planting, resting points, feeding plates
+ [[205,120],[440,262],[300,270],[440,118],[204,268]].forEach(([x,y],i)=>{g+=`<g transform="translate(${x} ${y})">${[0,1,2,3,4].map(k=>`<circle cx="${Math.round(Math.cos(k*1.26)*7)}" cy="${Math.round(Math.sin(k*1.26)*7)}" r="5" fill="${["#d1495b","#9b59b6","#f6a600"][(i+k)%3]}"/>`).join("")}<circle r="3.5" fill="#fff3b0"/></g>`});
+ [[232,182],[352,186],[412,186]].forEach(([x,y])=>{g+=`<path d="M${x-14} ${y+6} L${x+14} ${y-6} M${x-2} ${y+1} L${x+4} ${y+12}" stroke="#6b4a2a" stroke-width="4" stroke-linecap="round" fill="none"/>`});
+ [[292,118],[352,262]].forEach(([x,y])=>{g+=`<circle cx="${x}" cy="${y}" r="9" fill="#f2c56b" stroke="#a0522d" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="#e4572e"/>`});
+ // butterflies
+ [[262,110],[396,232],[316,200],[430,150]].forEach(([x,y],i)=>{g+=`<g transform="translate(${x} ${y}) rotate(${i*25-20})" fill="${["#2e86ab","#f6a600","#d1495b","#7b4fa3"][i]}"><ellipse cx="-5" cy="-3" rx="5" ry="4"/><ellipse cx="5" cy="-3" rx="5" ry="4"/><ellipse cx="-4" cy="4" rx="3.5" ry="3"/><ellipse cx="4" cy="4" rx="3.5" ry="3"/><rect x="-1" y="-6" width="2" height="12" rx="1" fill="#2d3b35"/></g>`});
+ // doors and arrows
+ if(rt==="single"){g+=door(320,290,0);g+=`<path d="M300 318 l-6 8 l-6 -8 M352 326 l6 -8 l6 8" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`}
+ else{g+=door(170,190,1)+door(470,190,1);g+=arr(243,190,-60)+arr(359,190,-60)+arr(301,190,60);
+  g+=rt==="loop"?arr(110,300,-90)+arr(140,190,0)+arr(500,190,0)+arr(530,300,90):arr(115,190,0)+arr(525,190,0)}
+ const z1=rt==="single"?mk(350,300):mk(140,160);
+ Z.push([z1,rt==="single"?"Door 1 (in and out)":"Door 1 (entry)",rt==="single"?"The only door. Turn Door 2 off in the exhibit’s customise menu. Guests going in meet guests coming out here, so it backs up when busy":"Turn on in the exhibit’s customise menu"]);
+ if(rt!=="single")Z.push([mk(500,160),"Door 2 (exit)","Turn on as well. Which wall each door sits on isn’t documented, so check in-game; the route works either way"]);
+ Z.push([mk(272,112),"Inside path","Keep it clear of extra decorations so guests can pass each other"]);
+ Z.push([mk(352,214),"Resting points","The butterflies need resting points; put them beside the path so guests see them land"]);
+ Z.push([mk(204,148),"Nectar flowers & fruit plates","Decoration that copies real butterfly houses; check in-game which items count toward the exhibit’s needs"]);
+ Z.push([rt==="through"?mk(60,140):rt==="loop"?mk(80,300):mk(290,340),rt==="through"?"Two main paths":"Main path",rt==="single"?"One short spur to the main path, shared by guests going in and coming out":rt==="loop"?"Both doors join the same main path, so the exhibit is a one-way side loop off it":"Each door joins a different main path, so guests pass through one way and use the exhibit as a short cut"]);
+ return `<div class="card"><h2>🦋 Walkthrough exhibit layout</h2>${rtChips("bfly",rt,1)}${rtNote(rt,1)}<div class="note" style="margin-bottom:6px">Schematic, not to scale: the game’s walkthrough exhibit comes in one size and shape. Follow the numbered markers; arrows show the way guests are meant to walk.</div><div class="wrap"><svg viewBox="0 0 640 400" role="img" aria-label="Walkthrough exhibit plan: ${RTS.find(r=>r[0]===rt)[2]}">${g}</svg></div><ol class="zl">${Z.map(z=>`<li><span class="zn">${z[0]}</span><div><b>${z[1]}</b><div class="note">${z[2]}</div></div></li>`).join("")}</ol><div class="note" style="margin-top:10px">• The exhibit’s customise menu lets you turn Door 1 and Door 2 on or off and remove any of the four walls, the floor or the ceiling. Removing walls doesn’t remove its power, temperature or resting-point needs. <span class="psrc">PZ2 guide (DTGRE)</span><br>• The walkthrough path crowds when guests come in from both ends; players suggest keeping it away from the busiest paths. <span class="psrc">Planet Zoo 1 players</span><br>• Not known yet: whether guests in PZ2 treat a second door as an exit, or just take the shortest way. If you see how they behave in-game, tell me and I’ll update this.</div></div>`}
 function layout(A,T,aq,nests){
  const arch=aq?"tank":archOf(A),sig=A.map(a=>a.n).sort().join("|");let opts=ASTY[arch];if(aq)opts=(T.W[1]+T.D[1])>=500?["multi","tunnel","bridge","window"]:["window","bridge","tunnel","multi"];
  const nowalk=arch==="bird"?A.filter(a=>!WALKOK.has(a.n)).map(a=>a.n):[];if(nowalk.length)opts=["blind"];
@@ -1631,10 +1675,10 @@ function layout(A,T,aq,nests){
  let st=LSTY[sig];if(!opts.includes(st))st=opts[0];
  let L;
  if(aq)L=aqLayout(A,T,st);
- else L=styled(A,T,nests,st,aq,RIDE[sig]);
- return Object.assign(L,{style:st,styles:opts,sig,nowalk});
+ else L=styled(A,T,nests,st,aq,RIDE[sig],rtOf(sig));
+ return Object.assign(L,{style:st,styles:opts,sig,nowalk,rt:WTS.includes(st)?rtOf(sig):null});
 }
-function styled(A,T,nests,st,aq,rd){
+function styled(A,T,nests,st,aq,rd,rt){
  const S=STY[st],land=T.L[1],wat=T.W[1],deep=T.D[1],climb=T.C[1],fly=T.F[1],wt=wat+deep;
  const area=Math.max(80,land+wat+deep),VW=820,VH=660,r=rng(11+Math.round(area)+st.length*97);
  const dom=A.slice().sort((x,y)=>y.s-x.s)[0],biome=dom.b,gp=GP[biome]||GP.Grass,bird=S.bird,wk=bird==="walk"?"net":(S.wk||"");
@@ -1755,22 +1799,23 @@ function styled(A,T,nests,st,aq,rd){
  // birds: perches, path or hide
  if(bird){let first=null;for(let k=0;k<5;k++){const p=spotA(26,{y:[.15,.7]});if(!p)continue;first=first||p;add(p[1],`<path d="M${f1(p[0])} ${f1(p[1])} L${f1(p[0])} ${f1(p[1]-26)} M${f1(p[0])} ${f1(p[1]-14)} L${f1(p[0]-14)} ${f1(p[1]-24)} M${f1(p[0])} ${f1(p[1]-20)} L${f1(p[0]+12)} ${f1(p[1]-30)}" stroke="#6b4a2a" stroke-width="3" stroke-linecap="round" fill="none"/>`)}if(first){focal=first;zone("Perch trees","Branching perches at different heights, some placed close to the guests’ route",first[0],first[1]-40)}
   const fdp=spotA(20,{x:[.4,.7],y:[.3,.6]});if(fdp){add(fdp[1],`<rect x="${f1(fdp[0]-12)}" y="${f1(fdp[1]-6)}" width="24" height="10" rx="2" fill="#d08a3a" stroke="#7a4a1a" stroke-width="1.5"/><line x1="${f1(fdp[0])}" y1="${f1(fdp[1]+4)}" x2="${f1(fdp[0])}" y2="${f1(fdp[1]+14)}" stroke="#7a4a1a" stroke-width="2"/>`);zone("Feeding station","Raised feeding tray in view of the guests",fdp[0]+16,fdp[1]-14)}}
- if(bird==="walk"){const e=P[at(.56)],wp=[[e[0],e[1]+24],[e[0],e[1]-10],[X(.24),Y(.62)],[X(.16),Y(.36)],[X(.32),Y(.16)],[X(.5),Y(.3)],[X(.46),Y(.62)],[e[0]+16,e[1]-12],[e[0]+16,e[1]+24]];
-  wp.forEach((p,i)=>{if(i&&i<wp.length-1)occ.push([p[0],p[1],18])});
-  over+=`<path d="${sPath(wp,false)}" fill="none" stroke="#9c927c" stroke-width="18" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#e6dcc2" stroke-width="14" stroke-linecap="round"/>`;
-  [wp[0],wp[wp.length-1]].forEach(q=>over+=`<rect x="${f1(q[0]-13)}" y="${f1(q[1]-22)}" width="26" height="18" rx="3" fill="#cfe7d8" stroke="#2d3b35" stroke-width="2"/><line x1="${f1(q[0]-13)}" y1="${f1(q[1]-13)}" x2="${f1(q[0]+13)}" y2="${f1(q[1]-13)}" stroke="#2d3b35" stroke-width="1.5"/>`);
-  zone("Double-door entrance","A basic guest gate works in-game; a small lobby with a second door is a real-zoo touch that looks the part",wp[0][0]-26,wp[0][1]-14);
-  zone("Walk-through path","Guests walk under the netting past perches, water and feeders",wp[4][0],wp[4][1]-20);
-  for(let t=1;t<wp.length-1;t+=2)over+=`<circle cx="${f1(wp[t][0]+4)}" cy="${f1(wp[t][1])}" r="3.5" fill="#2980b9" stroke="#fff"/>`}
- if(wk&&wk!=="net"){const ent=i=>{const n=nrm(P,i);return[[P[i][0]+n[0]*26,P[i][1]+n[1]*26],inset(i,14)]},a0=ent(at(.32)),a1=ent(at(.68)),wp=[a0[0],a0[1],[X(.68),Y(.6)],[X(.6),Y(.44)],[X(.42),Y(.42)],[X(.3),Y(.58)],a1[1],a1[0]];
-  wp.forEach((p,i)=>{if(i&&i<wp.length-1)occ.push([p[0],p[1],20])});
+ if(bird==="walk"||(wk&&wk!=="net")){const av=bird==="walk",ent=i=>{const n=nrm(P,i);return[[P[i][0]+n[0]*26,P[i][1]+n[1]*26],inset(i,14)]};let g0,g1,mid;
+  if(rt==="single"){g0=g1=ent(at(.5));mid=av?[[X(.5),Y(.66)],[X(.72),Y(.5)],[X(.64),Y(.22)],[X(.36),Y(.22)],[X(.28),Y(.5)],[X(.5),Y(.66)]]:[[X(.5),Y(.62)],[X(.68),Y(.52)],[X(.6),Y(.4)],[X(.4),Y(.4)],[X(.32),Y(.52)],[X(.5),Y(.62)]]}
+  else if(rt==="through"){g0=ent(at(.97));g1=ent(at(.03));mid=av?[[X(.16),Y(.5)],[X(.3),Y(.24)],[X(.5),Y(.5)],[X(.7),Y(.24)],[X(.84),Y(.5)]]:[[X(.18),Y(.6)],[X(.38),Y(.5)],[X(.58),Y(.62)],[X(.8),Y(.54)]]}
+  else{g0=ent(at(av?.4:.32));g1=ent(at(av?.6:.68));mid=av?[[X(.64),Y(.58)],[X(.76),Y(.32)],[X(.5),Y(.18)],[X(.24),Y(.32)],[X(.36),Y(.58)]]:[[X(.68),Y(.6)],[X(.6),Y(.44)],[X(.42),Y(.42)],[X(.3),Y(.58)]]}
+  const wp=[g0[0],g0[1],...mid,g1[1],g1[0]];
+  mid.forEach(p=>occ.push([p[0],p[1],av?18:20]));
   if(wk==="board"){over+=`<path d="${sPath(wp,false)}" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="22" stroke-linecap="round" transform="translate(3 4)"/><path d="${sPath(wp,false)}" fill="none" stroke="#5a3f26" stroke-width="20" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#c79a5e" stroke-width="16" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#8a6236" stroke-width="16" stroke-dasharray="1.5 6"/>`}
-  else over+=`<path d="${sPath(wp,false)}" fill="none" stroke="#9c927c" stroke-width="18" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#e6dcc2" stroke-width="14" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#8a6236" stroke-width="1.5" stroke-dasharray="5 4" transform="translate(0 -9)"/>`;
-  [a0,a1].forEach(([o,iN])=>{const m=[(o[0]+iN[0])/2,(o[1]+iN[1])/2];over+=`<rect x="${f1(m[0]-12)}" y="${f1(m[1]-9)}" width="24" height="18" rx="3" fill="#f2e6c9" stroke="#3b2f22" stroke-width="2"/><line x1="${f1(m[0]-12)}" y1="${f1(m[1])}" x2="${f1(m[0]+12)}" y2="${f1(m[1])}" stroke="#3b2f22" stroke-width="1.5"/>`});
-  zone("Guest gates","A guest gate for entry and one for exit; in-game a single guest gate can do both if space is tight",a0[1][0]+24,a0[1][1]-26);
-  zone(wk==="board"?"Raised boardwalk":"Walk-through path",wk==="board"?"Low wooden boardwalk with rails; animals pass underneath and around it":"Path with low rope edging; animals may cross it, guests stay on it",wp[4][0],wp[4][1]-22);
-  zone("Quiet area","Back half of the habitat, away from the path, where the animals can get away from guests",X(.5),Y(.24));
-  for(let t=2;t<wp.length-2;t++)over+=`<circle cx="${f1(wp[t][0]+5)}" cy="${f1(wp[t][1]+2)}" r="4" fill="${["#c0392b","#2980b9","#27ae60","#8e44ad"][t%4]}" stroke="#fff" stroke-width="1.5"/>`}
+  else over+=`<path d="${sPath(wp,false)}" fill="none" stroke="#9c927c" stroke-width="18" stroke-linecap="round"/><path d="${sPath(wp,false)}" fill="none" stroke="#e6dcc2" stroke-width="14" stroke-linecap="round"/>${av?"":`<path d="${sPath(wp,false)}" fill="none" stroke="#8a6236" stroke-width="1.5" stroke-dasharray="5 4" transform="translate(0 -9)"/>`}`;
+  if(rt!=="single"){const S=sCurve(wp,3);[.3,.5,.7].forEach(f=>{const i=Math.max(2,Math.min(S.length-3,Math.round(f*(S.length-1)))),p=S[i],an=Math.atan2(S[i+2][1]-S[i-2][1],S[i+2][0]-S[i-2][0])*57.3;over+=`<path d="M-4 -5 L3 0 L-4 5" fill="none" stroke="#5a4630" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(${f1(p[0])} ${f1(p[1])}) rotate(${Math.round(an)})"/>`})}
+  (rt==="single"?[g0]:[g0,g1]).forEach(([o,iN])=>{const m=[(o[0]+iN[0])/2,(o[1]+iN[1])/2];over+=`<rect x="${f1(m[0]-12)}" y="${f1(m[1]-9)}" width="24" height="18" rx="3" fill="${av?"#cfe7d8":"#f2e6c9"}" stroke="${av?"#2d3b35":"#3b2f22"}" stroke-width="2"/><line x1="${f1(m[0]-12)}" y1="${f1(m[1])}" x2="${f1(m[0]+12)}" y2="${f1(m[1])}" stroke="${av?"#2d3b35":"#3b2f22"}" stroke-width="1.5"/>`});
+  const gn=av?"door":"gate",bg=av?"; a basic guest gate works in-game, and a small lobby with a second door looks the part":"";
+  if(rt==="single")zone(av?"Double-door entrance":"Guest gate (in and out)",`One ${gn} for entry and exit. Guests going in meet guests coming out on the same stretch, so it backs up at busy times${bg}`,g0[1][0]+26,g0[1][1]-24);
+  else zone(av?"Entry & exit doors":"Entry & exit gates",(rt==="loop"?`Entry ${gn} on the right and exit ${gn} on the left, both joined to the same main path, so guests go round once instead of doubling back`:`Entry ${gn} on the left and exit ${gn} on the right. Join each to a different main path, so guests pass through one way and use it as a short cut`)+bg,g0[1][0]+(rt==="through"?30:24),g0[1][1]-26);
+  if(av)zone("Walk-through path","Guests walk under the netting past perches, water and feeders",mid[2][0],mid[2][1]-20);
+  else{zone(wk==="board"?"Raised boardwalk":"Walk-through path",wk==="board"?"Low wooden boardwalk with rails; animals pass underneath and around it":"Path with low rope edging; animals may cross it, guests stay on it",mid[2][0],mid[2][1]-22);
+   zone("Quiet area","Back half of the habitat, away from the path, where the animals can get away from guests",X(.5),Y(rt==="through"?.3:.24))}
+  for(let t=1;t<mid.length-(rt==="single"?1:0);t++)over+=`<circle cx="${f1(mid[t][0]+5)}" cy="${f1(mid[t][1]+2)}" r="${av?3.5:4}" fill="${av?"#2980b9":["#c0392b","#2980b9","#27ae60","#8e44ad"][t%4]}" stroke="#fff" stroke-width="1.5"/>`}
  if(bird==="blind"){const e=P[at(.5)];over+=`<rect x="${f1(e[0]-34)}" y="${f1(e[1]-14)}" width="68" height="24" rx="3" fill="#6b4a2a" stroke="#3a2a18" stroke-width="2"/><rect x="${f1(e[0]-26)}" y="${f1(e[1]-8)}" width="52" height="5" rx="2" fill="#1a120a"/>`;occ.push([e[0],e[1]-30,46]);
   for(let k=0;k<10;k++){const x=e[0]-70+r()*140,y=e[1]-34-r()*40;if(inPoly(P,x,y)&&!inW(x,y,0))add(y,pl("reed",Math.round(x),Math.round(y),18,"#8aa84a"))}
   zone("Bird hide","Screened building with a long viewing slot at bird height; guests stay hidden and quiet",e[0]+40,e[1]+10);zone("Reedbed","Tall reeds between the hide and the water give birds cover close to guests",e[0]-60,e[1]-60);SL.push([e,W?[W.cx,W.cy]:[X(.5),Y(.4)]])}
@@ -1899,9 +1944,10 @@ function styled(A,T,nests,st,aq,rd){
  // ---- design checklist ----
  const bar=Math.max(0,...A.map(a=>a.bar||0)),climbers=A.filter(a=>a.C&&a.C[0]>0).map(a=>a.n),fnames=[...new Set(fr.map(x=>FRN[x[2]]))];
  const guest=[],animal=[];
- if(bird==="walk")guest.push("Guests walk inside the aviary on a looping path through a double-door entrance (a basic guest gate in-game)");
- else if(wk==="path")guest.push("Guests walk through the habitat on a rope-edged path, entering and leaving through guest gates; a keeper or volunteer on the path helps");
- else if(wk==="board")guest.push("Guests cross the habitat on a low boardwalk with rails, entering and leaving through gates");
+ const rtw={single:"in and out through one shared {g}, so it backs up when busy",loop:"in through one {g} and out through another on the same main path, one way round",through:"in through a {g} on one side and out through a {g} on the other, each joined to a different main path"}[rt||"loop"];
+ if(bird==="walk")guest.push("Guests walk inside the aviary, "+rtw.replace(/\{g\}/g,"door")+" (a basic guest gate works for each door in-game)");
+ else if(wk==="path")guest.push("Guests walk through the habitat on a rope-edged path, "+rtw.replace(/\{g\}/g,"gate")+"; a keeper or volunteer on the path helps");
+ else if(wk==="board")guest.push("Guests cross the habitat on a low boardwalk with rails, "+rtw.replace(/\{g\}/g,"gate"));
  else if(bird==="blind")guest.push("Guests watch from a screened hide facing the reedbed and water");
  else if(aq)guest.push("Acrylic tunnel through the tank plus a front window at the gallery");
  else guest.push(isl?"Open view across the water moat, with a low rail at the shore":"Front barrier: "+fnames.join(", ")+", so nothing blocks the view");
@@ -3108,7 +3154,7 @@ function report(sp){
  <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.7"></div>
  <div class="zrow" style="margin-top:10px">${FEEDBACK.url?`<button type="button" class="zprimary" id="rpsend">Send report</button>`:""}<button type="button" id="rpcopy"${FEEDBACK.url?"":` class="zprimary"`}>Copy report</button></div>
  <p class="note" id="rpmsg" style="margin-top:6px">${FEEDBACK.url?(FEEDBACK.kind==="github"?"Send opens a pre-filled GitHub issue (needs a GitHub account).":"Send opens the feedback form, already filled in."):"Copy the report and post it where you found this planner."} A screenshot of the in-game page helps most.</p>`);
- const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v34\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
+ const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v35\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
  $("rpcopy").onclick=e=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}copy(r.body,e.target)};
  if($("rpsend"))$("rpsend").onclick=()=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}
   const E=encodeURIComponent,u=FEEDBACK.kind==="github"?FEEDBACK.url.replace(/\/$/,"")+"/issues/new?title="+E(`Wrong data: ${r.s||r.f}`)+"&body="+E(r.body):FEEDBACK.url.replace("{species}",E(r.s)).replace("{field}",E(r.f)).replace("{text}",E(r.body));
