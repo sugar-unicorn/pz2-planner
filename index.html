@@ -271,6 +271,7 @@ h2 .note~.fbtn{margin-left:6px}
 .exs button{display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center;text-align:left;border-radius:12px;padding:8px 10px}
 .exs button>*{pointer-events:none}
 .exs span{grid-row:span 2;font-size:24px}.exs small{font-weight:600;color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mixes button{grid-template-columns:auto 1fr;align-items:start}.exs.mixes span{grid-row:span 3}.mixes em{font-style:normal;font-size:12px;color:var(--mut);line-height:1.3}.mixh{font:800 12px "Nunito",system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:10px 0 6px}.mixes{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* print: just the plan */
 @media print{
@@ -786,6 +787,7 @@ function suggest(A){
   if(gs.length>1)h+=`<div class="chips"><button data-grp="${g.map(a=>a.n).join('|')}">Plan this enclosure alone</button></div>`;
   h+=ps.length?`<div class="note">Could also join (tap to add):</div><div class="chips">${ps.map(([b,sc])=>`<button class="chip" data-add="${b.n}" title="${sc?sc+' caution(s)':'no cautions'}">${sc?'':'★ '}${b.n}</button>`).join('')}</div>`:(g[0].t==="X"&&!flyMix(g)?'':'<div class="note">No other species fit with this group.</div>');
   h+='</div>'});
+ if(gs.length===1)h+=mixHint(A);
  return h+'<div class="note" style="margin-top:6px">★ = no cautions. Suggestions come from the Zoopedia’s cohabitation lists plus your overrides.</div></div>';
 }
 $("out").onclick=e=>{const d=e.target.dataset;
@@ -799,12 +801,60 @@ $("out").onclick=e=>{const d=e.target.dataset;
  else if(d.llab){LLAB=d.llab;try{localStorage.setItem("pz2llab",LLAB)}catch(e){}analyze()}
  else if(d.add){sel[d.add]=firstN(by(d.add));renderList();analyze()}
  else if(d.rel!=null){planRelease(+d.rel,d.sp.split("|"))}
+ else if(d.mix!=null){sel={};mixAdd(MIXES[+d.mix]);renderList();analyze();scrollTo({top:0,behavior:"auto"})}
+ else if(d.mixadd!=null){mixAdd(MIXES[+d.mixadd]);renderList();analyze()}
  else if(d.ex){sel={};EXS[+d.ex][2].filter(owned).forEach(n=>{const a=by(n);if(a)sel[n]=firstN(a)});renderList();analyze();scrollTo({top:0,behavior:"auto"})}
  else if(d.grp){const k=d.grp.split('|'),n={};k.forEach(x=>n[x]=sel[x]);sel=n;renderList();analyze()}};
 
 // v21: getting-started screen and plan summary
 const EXS=[["🦓","Savannah mix",["Plains Zebra","Reticulated Giraffe","Common Ostrich"]],["🦁","Lion pride",["Lion"]],["🦍","Gorilla troop",["Western Lowland Gorilla"]],["🦩","Flamingo aviary",["Greater Flamingo"]],["🦈","Reef tank",["Blacktip Reef Shark","Hawksbill Turtle","Blue and Gold Fusilier"]]];
-function startCard(){return `<div class="card start"><h2>👋 Start a plan</h2><ol class="steps"><li><b>Pick your animals</b><span>Search or filter the species list, then press <kbd>+</kbd>. The first press adds the smallest group the game allows.</span></li><li><b>Read the plan</b><span>A summary, cohabitation, space, Thriving requirements, terrain, a scaled layout and barriers appear here. Tap a card’s heading to fold it away.</span></li><li><b>Save it</b><span>Keep plans in <b>My zoo plans</b> above and build up a whole zoo.</span></li></ol><div class="zlab" style="margin:14px 0 6px">Or try an example</div><div class="exs">${EXS.filter(x=>x[2].every(by)&&x[2].some(owned)).map(([i,n,l],k)=>`<button type="button" data-ex="${k}"><span aria-hidden="true">${i}</span><b>${n}</b><small>${(l=l.filter(owned)).length>1?l.length+" species":l[0]}</small></button>`).join("")}</div><div class="zlab" style="margin:14px 0 6px">Or open a plan someone shared</div><div class="zrow"><input type="text" id="stopenin" placeholder="Paste a plan code (PZ2-…)" autocomplete="off" spellcheck="false" aria-label="Plan code"><button type="button" class="zprimary" id="stopen">Open plan</button></div><div class="note" style="margin-top:12px">Tip: press <kbd>/</kbd> to jump to the search box.</div></div>`}
+// v36: proven mixes. Hand-picked multi-species habitats; comboCheck() re-tests every one against the live data, so a mix only shows while
+// every pair is on Frontier's neutral lists or an in-game social group (not your overrides) and the group shares a temperature, humidity,
+// plant cover and terrain range (and a salinity for tanks). Biome is the planner's own tag, not a game need, so it isn't checked.
+const MIXES=[
+ ["🦓","Savannah grazers","H",["Plains Zebra","Blue Wildebeest","Thomson’s Gazelle","Common Ostrich"]],
+ ["🦒","Giraffe plains","H",["Reticulated Giraffe","Plains Zebra","Sable Antelope","Common Ostrich"]],
+ ["🐘","Elephants, rhinos & giraffes","H",["African Savannah Elephant","Black Rhinoceros","Masai Giraffe"]],
+ ["🦅","Dry savannah & vultures","H",["Gemsbok","Springbok","Common Ostrich","White-Backed Vulture"]],
+ ["🐃","Buffalo & antelope bush","H",["Cape Buffalo","Nyala","Common Warthog","Black Wildebeest"]],
+ ["🐗","Kalahari burrowers","H",["Aardvark","Common Warthog","Meerkat"]],
+ ["🦧","Sumatran rainforest","H",["Sumatran Orangutan","Siamang","Malayan Tapir","Asian Small-Clawed Otter"]],
+ ["🦜","Southeast Asian forest & birds","H",["Siamang","North Sulawesi Babirusa","Great Hornbill","Javan Green Magpie","Long-Tailed Parakeet"]],
+ ["🦍","Great ape forest","H",["Western Lowland Gorilla","Western Chimpanzee"]],
+ ["🐒","Tamarins & lemurs","H",["Golden Lion Tamarin","Ring-Tailed Lemur"]],
+ ["🐦","Tamarins & toucans","H",["Golden Lion Tamarin","Toco Toucan"]],
+ ["🐼","Panda forest","H",["Giant Panda","Red Panda"]],
+ ["🦌","European woodland","H",["European Bison","Red Deer","Wild Boar"]],
+ ["🐫","Asian steppe","H",["Bactrian Camel","Przewalski’s Horse","Red Deer"]],
+ ["🦩","Wetland birds","A",["Greater Flamingo","Shoebill"]],
+ ["🐠","Reef community","Q",["Blacktip Reef Shark","Hawksbill Turtle","Yellow Tang","Clown Anemonefish","Palette Surgeonfish","Threespot Damselfish"]],
+ ["🦈","Ray & shark lagoon","Q",["Indo-Pacific Leopard Shark","Javanese Cownose Ray","Ocellated Eagle Ray","Humphead Wrasse","Yellow Tang"]],
+ ["🐟","Big reef predators","Q",["Giant Grouper","Sand Tiger Shark","Sailfin Snapper","Red Lionfish","Clown Triggerfish","Blackspotted Puffer"]],
+ ["🌊","Open ocean","Q",["Dolphinfish","Pacific Bluefin Tuna","Hawksbill Turtle","Javanese Cownose Ray","Ocellated Eagle Ray"]],
+ ["🦈","Hammerhead deep tank","Q",["Great Hammerhead","Humphead Wrasse","Indo-Pacific Leopard Shark","Ocellated Eagle Ray"]],
+ ["🌿","Asian river tank","Q",["Giant Gourami","Clown Loach","Boeseman’s Rainbowfish","Blunthead Cichlid"]],
+ ["🎏","Koi pond","Q",["Koi","Common Rudd"]]];
+function comboCheck(A){if(A.length<2||A.some(a=>!a||a.t==="X"))return null;
+ const ivs=L=>{L=L.filter(Boolean);return L.length?[Math.max(...L.map(x=>x[0])),Math.min(...L.map(x=>x[1]))]:null},bad=x=>x&&x[0]>x[1];
+ let th=0,wn=0;for(let i=0;i<A.length;i++)for(let j=i+1;j<A.length;j++){const a=A[i],b=A[j];const k=okey(a.n,b.n),o=OVR[k];if(o==="no")return null;
+  delete OVR[k];const[r0]=rel(a,b);if(o)OVR[k]=o; // base data only: an override can't make a mix "proven"
+  if(r0!=="neutral"&&r0!=="thriving")return null;if(r0==="thriving")th++;wn+=pair(a,b).warn.length}
+ const aq=A.filter(a=>a.t==="Q").length;if(aq&&aq<A.length)return null;
+ if(aq){const s=["F","B","S"].filter(c=>A.every(a=>a.sal.includes("A")||a.sal.includes(c)));if(!s.length)return null}
+ const T=ivs(A.filter(a=>a.t0!==null).map(a=>[a.t0,a.t1])),H=ivs(A.map(a=>xd(a).hum)),C=ivs(A.map(a=>xd(a).cov));
+ if(bad(T)||bad(H)||bad(C))return null;const tp=terrPlan(A,1000);if(tp&&tp.conf.length)return null;
+ return{T,C,th,wn,aq:!!aq}}
+const mixOk=m=>{const A=m[3].map(by);return A.every(a=>a&&owned(a.n))?comboCheck(A):null};
+function mixAdd(m){m[3].forEach(n=>{if(!sel[n]){const a=by(n);if(a)sel[n]=firstN(a)}})}
+function mixGrid(){const L=MIXES.map((m,k)=>[m,k,mixOk(m)]).filter(x=>x[2]);if(!L.length)return"";
+ const one=([m,k,c])=>`<button type="button" data-mix="${k}" title="${m[3].join(", ")}"><span aria-hidden="true">${m[0]}</span><b>${m[1]}</b><small>${m[3].length} species · ${c.T?c.T[0]+"–"+c.T[1]+"°C":""}${c.th?" · "+c.th+" Thriving link"+(c.th>1?"s":""):""}</small><em>${m[3].join(" · ")}</em></button>`;
+ const land=L.filter(x=>!x[2].aq),aq=L.filter(x=>x[2].aq);
+ return `<div class="zlab" style="margin:14px 0 6px">Or start from a proven mix</div><div class="note" style="margin-bottom:6px">Every pair in each mix is on Frontier’s official cohabitation lists or shares an in-game social group, and the animals share a temperature, plant cover and terrain range${aq.length?" (tanks also share a salinity)":""}. Tap one to load it with the smallest groups.</div>${land.length?`<div class="mixh">Habitats &amp; aviaries</div><div class="exs mixes">${land.map(one).join("")}</div>`:""}${aq.length?`<div class="mixh">Aquariums</div><div class="exs mixes">${aq.map(one).join("")}</div>`:""}`}
+function mixHint(A){const have=new Set(A.map(a=>a.n));
+ const L=MIXES.map((m,k)=>{if(!m[3].some(n=>have.has(n))||m[3].every(n=>have.has(n))||!mixOk(m))return null;const U=[...new Set([...have,...m[3]])].map(by);const c=comboCheck(U);return c?[m,k,m[3].filter(n=>!have.has(n))]:null}).filter(Boolean);
+ if(!L.length)return"";
+ return `<div class="item"><b>🧩 Proven mixes for this enclosure</b><div class="note">Your species plus these all share safely by the game’s own lists (tap to add the rest):</div><div class="chips">${L.slice(0,4).map(([m,k,nw])=>`<button class="chip" data-mixadd="${k}" title="Adds ${nw.join(", ")}">${m[0]} ${m[1]} · +${nw.length}</button>`).join("")}</div></div>`}
+function startCard(){return `<div class="card start"><h2>👋 Start a plan</h2><ol class="steps"><li><b>Pick your animals</b><span>Search or filter the species list, then press <kbd>+</kbd>. The first press adds the smallest group the game allows.</span></li><li><b>Read the plan</b><span>A summary, cohabitation, space, Thriving requirements, terrain, a scaled layout and barriers appear here. Tap a card’s heading to fold it away.</span></li><li><b>Save it</b><span>Keep plans in <b>My zoo plans</b> above and build up a whole zoo.</span></li></ol><div class="zlab" style="margin:14px 0 6px">Or try an example</div><div class="exs">${EXS.filter(x=>x[2].every(by)&&x[2].some(owned)).map(([i,n,l],k)=>`<button type="button" data-ex="${k}"><span aria-hidden="true">${i}</span><b>${n}</b><small>${(l=l.filter(owned)).length>1?l.length+" species":l[0]}</small></button>`).join("")}</div>${mixGrid()}<div class="zlab" style="margin:14px 0 6px">Or open a plan someone shared</div><div class="zrow"><input type="text" id="stopenin" placeholder="Paste a plan code (PZ2-…)" autocomplete="off" spellcheck="false" aria-label="Plan code"><button type="button" class="zprimary" id="stopen">Open plan</button></div><div class="note" style="margin-top:12px">Tip: press <kbd>/</kbd> to jump to the search box.</div></div>`}
 function sumCard(A,o){const r=[],go=(s,k,v,g)=>r.push(`<button type="button" class="sml s-${s}" data-go="${g}"><i aria-hidden="true">${{ok:"✓",warn:"!",bad:"✕",info:"i"}[s]}</i><span><b>${k}</b><small>${v}</small></span></button>`);
  const sp=A.length,an=A.filter(a=>!isShoal(a)).reduce((x,a)=>x+sel[a.n],0),sh=A.filter(isShoal).reduce((x,a)=>x+sel[a.n],0);
  if(sp>1)go(o.nb?"bad":o.nw?"warn":"ok","Sharing",o.nb?`${o.nb} pair${o.nb>1?"s":""} can’t share · needs ${o.gs} enclosures`:o.nw?`One enclosure works, with ${o.nw} caution${o.nw>1?"s":""}`:`${sp>2?`All ${sp} species`:"Both species"} can share one enclosure${o.nt?` · ${o.nt} Thriving link${o.nt>1?"s":""}`:""}`,"cohabitation");
@@ -3154,7 +3204,7 @@ function report(sp){
  <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.7"></div>
  <div class="zrow" style="margin-top:10px">${FEEDBACK.url?`<button type="button" class="zprimary" id="rpsend">Send report</button>`:""}<button type="button" id="rpcopy"${FEEDBACK.url?"":` class="zprimary"`}>Copy report</button></div>
  <p class="note" id="rpmsg" style="margin-top:6px">${FEEDBACK.url?(FEEDBACK.kind==="github"?"Send opens a pre-filled GitHub issue (needs a GitHub account).":"Send opens the feedback form, already filled in."):"Copy the report and post it where you found this planner."} A screenshot of the in-game page helps most.</p>`);
- const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v35\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
+ const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v36\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
  $("rpcopy").onclick=e=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}copy(r.body,e.target)};
  if($("rpsend"))$("rpsend").onclick=()=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}
   const E=encodeURIComponent,u=FEEDBACK.kind==="github"?FEEDBACK.url.replace(/\/$/,"")+"/issues/new?title="+E(`Wrong data: ${r.s||r.f}`)+"&body="+E(r.body):FEEDBACK.url.replace("{species}",E(r.s)).replace("{field}",E(r.f)).replace("{text}",E(r.body));
