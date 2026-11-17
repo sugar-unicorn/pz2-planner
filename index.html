@@ -489,7 +489,7 @@ body.pmode .zeditrow,body.pmode #zquick,body.pmode #zsum{display:none!important}
 <div class="note">What Planet Zoo 2 players agree on since launch (13 Oct 2026), with Planet Zoo 1 tips marked. Nothing here comes from Frontier, because Frontier hasn’t published how crowding works.</div>
 <ol class="prules">
 <li><b>Make the entrance a plaza.</b> Every guest passes through it. Keep shops and vending machines off it: players report jams around a vending machine just inside the gate. <span class="psrc">PZ2 players report</span></li>
-<li><b>Main paths about 8 m or wider.</b> 4 m is the smallest width in game, and players say 4 m paths crowd quickly. Two paths side by side make a boulevard. <span class="psrc">PZ2 players report</span></li>
+<li><b>Main paths about 8 m or wider.</b> 4 m is the smallest width for normal paths (queue paths can be 2 m since update 1.0.10), and players say 4 m paths crowd quickly. Two paths side by side make a boulevard. <span class="psrc">PZ2 players report</span></li>
 <li><b>Branch before the first habitat,</b> so there’s no single spot everyone must pass. <span class="psrc">PZ2 players report</span></li>
 <li><b>Loops, not dead ends.</b> Guests turning back meet the people still walking in. <span class="psrc">Rule of thumb</span></li>
 <li><b>Keep viewing off the main path.</b> Guests stop wherever they can see animals, and skip bridges, tunnels and side viewpoints if they can already see from the main path. Screen that side and give the view a short side path. <span class="psrc">PZ2 players report</span></li>
@@ -2874,7 +2874,7 @@ function mapSvg(g,A){const W=PS.W,Hh=PS.H;let s=`<svg id="pmap" class="${tool===
 function ctx(){const z=typeof zoo==="function"?zoo():null;let h="";
  if(tool==="path")h+=`<div class="note">Tap the map to lay a path point by point. Tap an existing point or path to join it. Tap the last point again, or Stop, to finish.</div>
   <div class="h3">Width</div><div class="seg" role="group" aria-label="Path width">${WID.map(w=>`<button type="button" data-pw="${w}" class="${pw===w?"on":""}" aria-pressed="${pw===w}">${w} m</button>`).join("")}</div>
-  <div class="note">4 m is the smallest width in game. Players use about 8 m for main paths.</div>${chain?`<div class="pact"><button type="button" data-pa="stop">■ Stop this path</button></div>`:""}`;
+  <div class="note">4 m is the smallest width for normal paths, and queue paths can be as narrow as 2 m (update 1.0.10). Players use about 8 m for main paths.</div>${chain?`<div class="pact"><button type="button" data-pa="stop">■ Stop this path</button></div>`:""}`;
  if(tool==="place"){h+=`<div class="ppal" role="group" aria-label="What to place">${PAL.map(k=>`<button type="button" data-pk="${k}" class="${pk===k&&!tpl?"on":""}" aria-pressed="${pk===k&&!tpl}">${KN[k][0]} ${KN[k][1]}</button>`).join("")}</div>`;
   if(pk==="hab"&&!tpl)h+=`<div class="pin"><label for="parea">Area</label><input id="parea" type="number" min="50" step="50" value="${parea}"> m²</div>`;
   if(pk==="plaza")h+=`<div class="h3">Plaza size</div><div class="seg">${PDIA.map(d=>`<button type="button" data-pd="${d}" class="${pd===d?"on":""}" aria-pressed="${pd===d}">${d} m across</button>`).join("")}</div>`;
@@ -3205,10 +3205,10 @@ function report(sp){
  <div class="pzf"><label class="zlab" for="rpsp">Species</label><select id="rpsp"><option value="">Not about one species</option>${DB.map(a=>`<option${a.n===sp?" selected":""}>${esc(a.n)}</option>`).join("")}</select></div>
  <div class="pzf"><label class="zlab" for="rpf">What is wrong</label><select id="rpf">${FIELDS.map(f=>`<option>${f}</option>`).join("")}</select></div>
  <div class="pzf"><label class="zlab" for="rpt">What the game shows</label><textarea id="rpt" class="pzta" rows="4" maxlength="1500" placeholder="For example: the in-game Zoopedia lists Yellow Tang as a compatible species."></textarea></div>
- <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.7"></div>
+ <div class="pzf"><label class="zlab" for="rpv">Game version (optional)</label><input type="text" id="rpv" maxlength="20" placeholder="e.g. 1.0.11"></div>
  <div class="zrow" style="margin-top:10px">${FEEDBACK.url?`<button type="button" class="zprimary" id="rpsend">Send report</button>`:""}<button type="button" id="rpcopy"${FEEDBACK.url?"":` class="zprimary"`}>Copy report</button></div>
  <p class="note" id="rpmsg" style="margin-top:6px">${FEEDBACK.url?(FEEDBACK.kind==="github"?"Send opens a pre-filled GitHub issue (needs a GitHub account).":"Send opens the feedback form, already filled in."):"Copy the report and post it where you found this planner."} A screenshot of the in-game page helps most.</p>`);
- const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v37\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
+ const text=()=>{const s=$("rpsp").value,f=$("rpf").value,v=$("rpv").value.trim();return{s,f,t:$("rpt").value.trim(),body:`Species: ${s||"(none)"}\nWhat is wrong: ${f}\nGame version: ${v||"(not given)"}\nPlanner version: v38\n\nWhat the game shows:\n${$("rpt").value.trim()}`}};
  $("rpcopy").onclick=e=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}copy(r.body,e.target)};
  if($("rpsend"))$("rpsend").onclick=()=>{const r=text();if(!r.t){$("rpt").focus();$("rpmsg").textContent="Describe what the game shows first.";return}
   const E=encodeURIComponent,u=FEEDBACK.kind==="github"?FEEDBACK.url.replace(/\/$/,"")+"/issues/new?title="+E(`Wrong data: ${r.s||r.f}`)+"&body="+E(r.body):FEEDBACK.url.replace("{species}",E(r.s)).replace("{field}",E(r.f)).replace("{text}",E(r.body));
